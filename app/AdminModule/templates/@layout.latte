@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="cs" data-bs-theme="light">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link href="{$basePath}/css/bootstrap.min.css" rel="stylesheet">
+	<link href="{$basePath}/bootstrap-icons/bootstrap-icons.min.css" rel="stylesheet">
+	<link href="{$basePath}/css/admin.css" rel="stylesheet">
+	<link rel="icon" type="image/png" sizes="16x16" href="/images/ticket_logo.png">
+	<title>{ifset $title}{$title}{/ifset}</title>
+</head>
+
+<body>
+<div class="container">
+	<div class="d-flex justify-content-center align-items-center h-100 flash-messages">
+		<div n:foreach="$flashes as $flash" class="alert flash alert-{$flash->type} alert-dismissible fade show" role="alert">{$flash->message}<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></div>
+	</div>
+	<div id="alertPlaceholder" class="d-flex justify-content-center align-items-center h-100 flash-messages">
+
+	</div>
+</div>
+
+	<div id="overlay" class="overlay d-none">
+		<div class="d-flex justify-content-center align-items-center h-100">
+			<div class="spinner">
+				<div></div>
+				<div></div>
+				<div></div>
+				<div></div>
+				<div></div>
+				<div></div>
+				<div></div>
+				<div></div>
+				<div></div>
+				<div></div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Modal -->
+	<div class="modal fade" id="resultSearchedClients" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+		<div class="modal-dialog modal-lg">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h1 class="modal-title fs-5" id="resultSearchedClientsLabel">Nalezení klienti</h1>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				</div>
+				<div class="modal-body">
+					<table class="table table-sm table-responsive-md">
+						<thead>
+							<th>ID</th>
+							<th>Jméno</th>
+							<th>Příjmení</th>
+							<th>Email</th>
+							<th></th>
+						</thead>
+						<tbody>
+
+						</tbody>
+					</table>
+				</div>
+				<div class="modal-footer">
+					<button id="btnSearchModalClose" type="button" class="btn btn-secondary" data-bs-dismiss="modal">Zavřít</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<nav class="navbar navbar-expand-lg bg-body-tertiary border-bottom">
+		<div class="container-fluid">
+			<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
+				<span class="navbar-toggler-icon"></span>
+			</button>
+			<a class="navbar-brand text-center" href="#"><img src="{$basePath}/images/ticket_logo-removebg.png" alt="logo" height="45px"></a>
+			<div class="collapse navbar-collapse" id="navbar">
+				<ul class="navbar-nav me-auto mb-2 mb-lg-0">
+					<li n:class="$presenter->isLinkCurrent('Homepage:default') ? 'nav-item border-bottom border-2': 'nav-item'">
+						<a n:class="$presenter->isLinkCurrent('Homepage:default') ? 'nav-link border-bottom border-2 active': 'nav-link'" aria-current="page" n:href="Homepage:default"><i class="bi bi-house"></i></a>
+					</li>
+					<li n:class="$presenter->isLinkCurrent('Clients:default') || $presenter->isLinkCurrent('Clients:detail') ? 'nav-item border-bottom border-2': 'nav-item'">
+						<a n:class="$presenter->isLinkCurrent('Clients:default') || $presenter->isLinkCurrent('Clients:detail') ? 'nav-link border-bottom border-2 active': 'nav-link'" n:href="Clients:default">Klienti</a>
+					</li>
+					<li n:class="$presenter->isLinkCurrent('Management:default') || $presenter->isLinkCurrent('Management:actions')  ? 'nav-item border-bottom border-2': 'nav-item'">
+						<a n:class="$presenter->isLinkCurrent('Management:default') || $presenter->isLinkCurrent('Management:actions') ? 'nav-link border-bottom border-2 active': 'nav-link'" n:href="Management:default">Správa</a>
+					</li>
+					<li n:class="$presenter->isLinkCurrent('Scanner:default') ? 'nav-item border-bottom border-2': 'nav-item'">
+						<a n:class="$presenter->isLinkCurrent('Scanner:default') ? 'nav-link border-bottom border-2 active': 'nav-link'" n:href="Scanner:default">Scanner</a>
+					</li>
+				</ul>
+				<div class="d-flex me-3" role="search" autocomplete="off">
+					<input id="searchField" class="form-control me-2" type="search" placeholder="Vyhledat klienta" aria-label="Vyhledat klienta">
+					<button id="btnSearch" class="btn btn-outline-success"><i class="bi bi-search"></i></button>
+				</div>
+				<div class="d-flex dropdown me-3">
+					<button class="btn btn-link nav-link py-2 px-0 px-lg-2 dropdown-toggle d-flex align-items-center" id="bd-theme" type="button" aria-expanded="false" data-bs-toggle="dropdown" data-bs-display="static" aria-label="Toggle theme (dark)">
+						<i id="bd-theme-icon" class="bi"></i>
+					</button>
+					<ul class="dropdown-menu dropdown-menu-end" aria-labelledby="bd-theme-text">
+						<li>
+							<button type="button" class="dropdown-item d-flex align-items-center" data-bs-theme-value="light" data-bs-theme-icon="bi-sun-fill" aria-pressed="false">
+								<i class="bi bi-sun-fill me-2"></i>
+								<span>Světlý</span>
+							</button>
+						</li>
+						<li>
+							<button type="button" class="dropdown-item d-flex align-items-center" data-bs-theme-value="dark" data-bs-theme-icon="bi-moon-stars-fill" aria-pressed="true">
+								<i class="bi bi-moon-stars-fill me-2"></i>
+								Tmavý
+							</button>
+						</li>
+					</ul>
+				</div>
+				<div class="d-flex">
+					<span class="align-items-center">{$user->data['first_name']} {$user->data['last_name']}</span>
+					<a href="{plink Login:logout}" class="text-danger ms-2" title="Odhlásit"><i class="bi bi-box-arrow-right"></i></a>
+				</div>
+			</div>
+		</div>
+	</nav>
+
+	{include content}
+
+	{block scripts}
+		<script src="{$basePath}/js/popper.min.js"></script>
+		<script src="{$basePath}/js/bootstrap.min.js"></script>
+		<script src="{$basePath}/js/Naja.min.js"></script>
+		<script src="{$basePath}/js/popper.min.js"></script>
+		<script src="{$basePath}/js/jquery.min.js"></script>
+		<script src="{$basePath}/js/ap_global_function.js"></script>
+		<script src="https://nette.github.io/resources/js/3/netteForms.min.js"></script>
+	{/block}
+	<script n:syntax="double">
+		$(function () {
+			naja.initialize();
+
+			let theme = $('html');
+			let selectedTheme = theme.attr('data-bs-theme');
+			let localStorageTheme = localStorage.getItem('theme');
+
+			if (localStorageTheme === null) {
+				if (selectedTheme === 'dark') {
+					$('#bd-theme-icon').removeClass().addClass('bi bi-moon-stars-fill');
+				} else {
+					$('#bd-theme-icon').removeClass().addClass('bi bi-sun-fill');
+				}
+			} else {
+				if (localStorageTheme === 'dark') {
+					$('#bd-theme-icon').removeClass().addClass('bi bi-moon-stars-fill');
+					theme.attr('data-bs-theme', localStorageTheme);
+				} else {
+					$('#bd-theme-icon').removeClass().addClass('bi bi-sun-fill');
+					theme.attr('data-bs-theme', localStorageTheme);
+				}
+			}
+
+			$('.dropdown-menu button').on('click', function () {
+				let selectTheme = $(this).attr('data-bs-theme-value');
+				let selectThemeIcon = $(this).attr('data-bs-theme-icon');
+				theme.attr('data-bs-theme', selectTheme);
+				localStorage.setItem('theme', selectTheme);
+				$('#bd-theme-icon').removeClass().addClass('bi ' + selectThemeIcon);
+			});
+
+			/**
+			 * FUNCTIONS
+			 */
+
+
+
+			/**
+			 * EVENTS
+			 */
+
+			$('#btnSearch').on('click', function (e) {
+				$('#overlay').removeClass('d-none');
+				let searchField = $('#searchField').val();
+				let originUrl = window.location.origin;
+
+				ajaxCall({{link search!}}, {searchedText: searchField}, 'GET')
+					.then(function (payload) {
+						if (Array.isArray(payload)) {
+							$('#overlay').addClass('d-none');
+							for (let item of payload) {
+								$('#resultSearchedClients tbody').append('<tr><td>' + item.id + '</td><td>' + item.firstName + '</td><td>' + item.lastName + '</td><td>' + item.email + '</td><td><a href="' + originUrl + '/admin/clients/default/' + item.id + '" class="btn-primary" title="Profil klienta"><i class="bi bi-person-fill"></i></a></td></tr>');
+							}
+							$('#searchField').val('');
+
+							$('#resultSearchedClients').modal('show');
+
+						} else {
+							alert('Žádný klient nebyl nalezen');
+							$('#overlay').addClass('d-none');
+							$('#searchField').val('');
+						}
+					})
+					.catch(function (error) {
+						alert('Nastala chyba při hledání klienta...kontaktujte správce');
+						$('#overlay').addClass('d-none');
+						$('#searchField').val('');
+					});
+			});
+
+			$('#btnSearchModalClose').on('click', function (e) {
+				$('#resultSearchedClients tbody').empty();
+			});
+
+			$('#searchField').on('keyup', function (e) {
+				if (e.keyCode === 13) {
+					$('#btnSearch').trigger('click');
+				}
+			});
+
+		});
+	</script>
+	{ifset page-js}
+		{include page-js}
+	{/ifset}
+</body>
+</html>

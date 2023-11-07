@@ -1,0 +1,27 @@
+{block sidebar}
+    <style>
+        @media(min-width: 992px){
+            .sidebar{
+                height: 92vh;
+            }
+        }
+
+    </style>
+
+    <!-- Modal -->
+
+    <div class="col-md-2 bg-body-tertiary border-end sidebar">
+        <div class="d-grid gap-2 mt-2 mb-2">
+            <a n:href="Management:actions" class="btn btn-sm btn-outline-primary {$presenter->isLinkCurrent('Management:actions') ? 'active'}"><i class="bi bi-emoji-laughing"></i> Akce</a>
+        </div>
+    </div>
+
+    <script src="{$basePath}/js/jquery.min.js"></script>
+    <script n:syntax="double">
+        $(function () {
+            /**
+             * Events
+             */
+        });
+    </script>
+{/block}

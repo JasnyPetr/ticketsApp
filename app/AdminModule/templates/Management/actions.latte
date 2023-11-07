@@ -1,0 +1,401 @@
+{layout '../@layout.latte'}
+{block content}
+    <!-- Modal -->
+    <div class="modal fade" id="addNewActionModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="addNewActionModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="addNewActionModalLabel">Založení nové akce</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form n:name="addNewActionForm" autocomplete="off">
+                    <div class="modal-body">
+                        <div class="form-floating mb-3">
+                            <input class="form-control" n:name="name" placeholder="{$form['name']->caption}">
+                            <label>{$form['name']->caption}</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input class="form-control" n:name="dateEvent" placeholder="{$form['dateEvent']->caption}">
+                            <label>{$form['dateEvent']->caption}</label>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input n:name="isActive" class="form-check-input" type="checkbox" role="switch">
+                            <label class="form-check-label" >{$form['isActive']->caption}</label>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Zavřít</button>
+                        <button n:name="addNewAction" class="btn btn-success">{$form['addNewAction']->caption}</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="editActionModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="addNewActionModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="addNewActionModalLabel">Úprava akce</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-floating mb-3">
+                        <input class="form-control" type="text" id="actionName" placeholder="Název akce">
+                        <label>Název akce</label>
+                    </div>
+                    <div class="form-floating mb-3">
+                        <input class="form-control" type="date" id="dateEvent" placeholder="Datum akce">
+                        <label>Datum akce</label>
+                    </div>
+                    <div class="form-check form-switch">
+                        <input id="isActive" class="form-check-input" type="checkbox" role="switch">
+                        <label class="form-check-label" >Aktivní</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Zavřít</button>
+                    <button id="btnSaveAction" class="btn btn-success">Uložit</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container-fluid">
+        <div class="row">
+            {include 'sidebar.latte'}
+                {if isset($actions) && count($actions) > 0}
+                <div class="col-md-10 sidebar border-start">
+                    <div class="card shadow mt-2 mb-2">
+                        <div class="card-header">Seznam akcí</div>
+                        <div class="card-body table-responsive">
+                            <a id="btnAddNewActionModalOpen" class="btn btn-sm btn-outline-primary mb-2">Nová akce</a>
+                            <table id="tbActions" class="table table-sm table-striped table-hover">
+                                <thead>
+                                <tr>
+                                    <th scope="col"></th>
+                                    <th scope="col">ID</th>
+                                    <th scope="col">Název</th>
+                                    <th class="text-center">Datum konání</th>
+                                    <th class="text-center">Vstupenky celkem</th>
+                                    <th class="text-center">Vstupenky platné</th>
+                                    <th class="text-center">Stav</th>
+                                    <th></th>
+                                    <th></th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {foreach $actions as $ac}
+                                    <tr data-id="{$ac->id}" data-name="{$ac->name}" data-date="{$ac->dateEvent}" data-is-active="{$ac->isActive}">
+                                        <td><a class="btn text-primary detail-actions p-0 m-0"><i class="bi bi-caret-right"></i></a></td>
+                                        <td>{$ac->id}</td>
+                                        <td>{$ac->name}</td>
+                                        <td class="text-center">{$ac->dateEvent}</td>
+                                        <td class="text-center">{$ac->countTickets}</td>
+                                        <td class="text-center">{$ac->countTickets - $ac->countTicketsUsed}</td>
+                                        <td class="text-center"><a class="btn {$ac->isActive ? 'text-success' : 'text-danger'} status-action p-0 m-0" title="{$ac->isActive ? 'Aktivní' : 'Neaktivní'}"><i class="bi bi-circle-fill"></i></a></td>
+                                        <td><a class="btn text-primary edit-action btn-sm p-0 m-0" title="Upravit akci"><i class="bi bi-pen"></i></a></td>
+                                        <td><a class="btn delete-action btn-sm text-danger p-0 m-0" title="Smazat akci"><i class="bi bi-trash3"></i></a></td>
+                                    </tr>
+                                    <tr>
+                                        <td id="detailAction-{$ac->id}" colspan="9" class="d-none">
+                                            <div class="card">
+                                                <div class="card-header">Vydané vstupenky</div>
+                                                <div class="card-body table-responsive">
+                                                    <table class="table table-sm">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>ID</th>
+                                                                <th>Kód</th>
+                                                                <th>Klient</th>
+                                                                <th>Stav</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {/foreach}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="card-footer">
+                            {if !$paginator->isFirst()}
+                                <a class="btn btn-outline-primary" n:href="default, 1">První</a>
+                                &nbsp;|&nbsp;
+                                <a class="btn btn-outline-primary" n:href="default, $paginator->page-1">Předchozí</a>
+                                &nbsp;|&nbsp;
+                            {/if}
+
+                                Stránka {$paginator->getPage()} z {$paginator->getPageCount()}
+
+	                        {if !$paginator->isLast()}
+                                &nbsp;|&nbsp;
+                                <a class="btn btn-outline-primary" n:href="default, $paginator->getPage() + 1">Další</a>
+                                &nbsp;|&nbsp;
+                                <a class="btn btn-outline-primary" n:href="default, $paginator->getPageCount()">Poslední</a>
+                            {/if}
+                        </div>
+                    </div>
+                </div>
+            {else}
+                <div class="col-md-10 sidebar border-start">
+                    <a id="btnAddNewActionModalOpen" class="btn btn-sm btn-outline-primary mb-2 mt-2">Nová akce</a>
+                    <div class="alert alert-info mt-2" role="alert">
+                        Nebyla založena žádná akce.
+                    </div>
+                </div>
+            {/if}
+        </div>
+    </div>
+
+{/block}
+{block page-js}
+    <script n:syntax="double">
+        $(function () {
+            /**
+             * Functions
+             */
+
+
+            /**
+             * Events
+             */
+
+            // Function for clear edit action modal
+            $('#editActionModal').on('hidden.bs.modal', function () {
+                $('#editActionModal #actionName').val('');
+                $('#editActionModal #dateEvent').val('');
+                $('#editActionModal #isActive').prop('checked', false);
+            });
+
+            // Function for save action
+            $('#btnSaveAction').on('click', function () {
+                let actionId = $('#editActionModal').attr('data-id');
+                let actionName = $('#editActionModal #actionName').val();
+                let dateEvent = $('#editActionModal #dateEvent').val();
+                let isActive = $('#editActionModal #isActive').prop('checked');
+
+                $('#editActionModal').modal('hide');
+
+                ajaxCall({{link saveEditedAction!}}, {
+                    actionId: actionId,
+                    actionName: actionName,
+                    dateEvent: dateEvent,
+                    isActive: isActive
+                }, 'GET').then(function (response) {
+                    if (response) {
+                        appendAlert('Akce upravena.', 'success');
+                        setTimeout(function () {
+                            $(".alert").fadeTo(2000, 500).slideUp(500, function(){
+                                $(".alert").slideUp(500);
+                            });
+                            window.location.reload();
+                        },1500);
+                    }else{
+                        appendAlert('Nepodařilo se upravit akci...kontaktujte správce', 'warning');
+                        setTimeout(function () {
+                            $(".alert").fadeTo(2000, 500).slideUp(500, function(){
+                                $(".alert").slideUp(500);
+                            });
+                        },3000);
+                    }
+                }).catch(function (err) {
+                    appendAlert('Nastala chyba...kontaktujte správce', 'danger');
+                    setTimeout(function () {
+                        $(".alert").fadeTo(2000, 500).slideUp(500, function(){
+                            $(".alert").slideUp(500);
+                        });
+                    },3000);
+                    console.log(err);
+                });
+            });
+
+            // Function for edit action modal open
+            $(document).on('click', '#tbActions .edit-action', function () {
+                let currentRow = $(this).closest('tr');
+                let actionId = currentRow.attr('data-id');
+                let textDate = currentRow.attr('data-date').split('.');
+                $('#editActionModal').attr('data-id', actionId);
+                $('#editActionModal #actionName').val(currentRow.attr('data-name'));
+                $('#editActionModal #dateEvent').val(textDate[2]+'-'+textDate[1]+'-'+textDate[0]);
+                $('#editActionModal #isActive').prop('checked', currentRow.attr('data-is-active') === '1');
+                $('#editActionModal').modal('show');
+            });
+
+            // Function for delete action
+            $(document).on('click', '#tbActions .delete-action', function () {
+                let currentRow = $(this).closest('tr');
+                let actionId = currentRow.attr('data-id');
+
+                if (confirm('SMAZÁNÍM AKCE SMAŽETE VŠECHNY SOUVISEJÍCÍ VSTUPENKY....OPRAVDU CHCETE POKRAČOVAT?')) {
+                    ajaxCall({{link deleteAction!}}, {
+                        actionId:actionId
+                    }, 'GET').then(function (response) {
+                        if (response) {
+                            appendAlert('Akce smazána.', 'success');
+                            setTimeout(function () {
+                                $(".alert").fadeTo(2000, 500).slideUp(500, function(){
+                                    $(".alert").slideUp(500);
+                                });
+                                window.location.reload();
+                            },1500);
+                        }else{
+                            appendAlert('Nepodařilo se smazat akci...kontaktujte správce', 'warning');
+                            setTimeout(function () {
+                                $(".alert").fadeTo(2000, 500).slideUp(500, function(){
+                                    $(".alert").slideUp(500);
+                                });
+                            },3000);
+                        }
+                    }).catch(function (err) {
+                        appendAlert('Nastala chyba...kontaktujte správce', 'danger');
+                        setTimeout(function () {
+                            $(".alert").fadeTo(2000, 500).slideUp(500, function(){
+                                $(".alert").slideUp(500);
+                            });
+                        },3000);
+                        console.log(err);
+                    });
+                }
+            });
+
+            // Function for open modal for add new action
+            $('#btnAddNewActionModalOpen').on('click', function () {
+                $('#addNewActionModal').modal('show');
+            });
+
+            // Function for change status action
+            $('#tbActions .status-action').on('click', function () {
+                let currentRow = $(this).closest('tr');
+                let actionId = currentRow.attr('data-id');
+                let isChangeStatusActon = false;
+                let isChangeStatusTickets = false;
+
+                if (confirm('Opravdu si přejete změnit stav akce?')) {
+                    isChangeStatusActon = true;
+                    if (confirm('Přejete si změnit stav všech vstupenek vydané na tuto akci?')) {
+                        isChangeStatusTickets = true;
+                    }
+                }
+
+                if (isChangeStatusActon) {
+                    ajaxCall({{link changeActionStatus!}}, {
+                        actionId:actionId,
+                        isChangeStatusTickets:isChangeStatusTickets
+                    }, 'GET').then(function (response) {
+                        if (response) {
+                            appendAlert('Stav akce změněn.', 'success');
+                            setTimeout(function () {
+                                $(".alert").fadeTo(2000, 500).slideUp(500, function(){
+                                    $(".alert").slideUp(500);
+                                });
+                                window.location.reload();
+                            },1500);
+                        }else{
+                            appendAlert('Nepodařilo se změnit stav akce...kontaktujte správce', 'warning');
+                            setTimeout(function () {
+                                $(".alert").fadeTo(2000, 500).slideUp(500, function(){
+                                    $(".alert").slideUp(500);
+                                });
+                            },3000);
+                        }
+                    }).catch(function (err) {
+                        appendAlert('Nastala chyba...kontaktujte správce', 'danger');
+                        setTimeout(function () {
+                            $(".alert").fadeTo(2000, 500).slideUp(500, function(){
+                                $(".alert").slideUp(500);
+                            });
+                        },3000);
+                        console.log(err);
+                    });
+                }
+            });
+
+            // Function for view action detail
+            $('#tbActions .detail-actions').on('click', function () {
+                let id = $(this).closest('tr').data('id');
+                let icon = $(this).find('i');
+                let detail = $('#detailAction-' + id);
+                if (detail.hasClass('d-none')) {
+                    ajaxCall({{link getActionDetail!}}, {actionId: id}, 'GET').then(function (response) {
+                        if (Array.isArray(response)) {
+                            for (let item of response) {
+                                detail.find('.card-body tbody').append(
+                                    '<tr data-id="'+item.id+'">'
+                                    + '<td>'+item.id+'</td>'
+                                    + '<td>'+item.code+'</td>'
+                                    + '<td><a href="'+item.clientLink+'">'+item.firstName+' '+item.lastName+'</td>'
+                                    + '<td><a class="btn '+(item.isActive ? 'text-success' : 'text-danger')+' ticket p-0 m-0" title="'+(item.isActive ? "Aktivní" : "Neaktivní")+'"><i class="bi bi-circle-fill"></i></a></td>'
+                                    + '</tr>'
+                                );
+                            }
+                            detail.removeClass('d-none');
+                            icon.removeClass('bi-caret-right').addClass('bi-caret-down');
+                        }else{
+                            appendAlert('Pro tuto akci nebyla vydána žádná vstupenka.', 'info');
+                            setTimeout(function () {
+                                $(".alert").fadeTo(2000, 500).slideUp(500, function(){
+                                    $(".alert").slideUp(500);
+                                });
+                            },3000);
+                        }
+                    }).catch(function (error) {
+                        appendAlert('Nastala chyba...kontaktujte správce.', 'danger');
+                        setTimeout(function () {
+                            $(".alert").fadeTo(2000, 500).slideUp(500, function(){
+                                $(".alert").slideUp(500);
+                            });
+                        },3000);
+                    });
+
+                } else {
+                    detail.find('.card-body tbody').empty();
+                    detail.addClass('d-none');
+                    icon.removeClass('bi-caret-down').addClass('bi-caret-right');
+                }
+            });
+
+            // Function for change status ticket
+            $(document).on('click', '.ticket', function () {
+                let currentRow = $(this).closest('tr');
+                let ticketId = currentRow.attr('data-id');
+
+                if (confirm('Opravdu chcete změnit stav vstupenky?')) {
+                    ajaxCall({{link changeTicketStatus!}}, {
+                        ticketId:ticketId
+                    }, 'GET').then(function (response) {
+                        if (response) {
+                            appendAlert('Stav vstupenky změněn.', 'success');
+                            setTimeout(function () {
+                                $(".alert").fadeTo(2000, 500).slideUp(500, function(){
+                                    $(".alert").slideUp(500);
+                                });
+                                window.location.reload();
+                            },1500);
+                        }else{
+                            appendAlert('Nepodařilo se změnit stav vstupenky...kontaktujte správce', 'warning');
+                            setTimeout(function () {
+                                $(".alert").fadeTo(2000, 500).slideUp(500, function(){
+                                    $(".alert").slideUp(500);
+                                });
+                            },3000);
+                        }
+                    }).catch(function (err) {
+                        appendAlert('Nastala chyba...kontaktujte správce', 'danger');
+                        setTimeout(function () {
+                            $(".alert").fadeTo(2000, 500).slideUp(500, function(){
+                                $(".alert").slideUp(500);
+                            });
+                        },3000);
+                        console.log(err);
+                    });
+                }
+            });
+        });
+    </script>
+{/block}

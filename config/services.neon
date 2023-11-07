@@ -1,0 +1,13 @@
+search:
+	-
+		in: %appDir%
+		classes:
+			- *Factory
+			- *Facade
+			- *Repository
+			- *Manager
+
+
+services:
+	- App\Router\RouterFactory::createRouter
+	- App\Model\MyAuthenticator(@database.default.context)

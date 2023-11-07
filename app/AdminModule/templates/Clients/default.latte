@@ -1,0 +1,85 @@
+{layout '../@layout.latte'}
+{block content}
+    <style>
+        @media(min-width: 992px){
+            .sidebar{
+                height: 92vh;
+            }
+        }
+
+    </style>
+
+    <!-- Modal -->
+
+
+    <div class="container-fluid">
+        <div class="row">
+            {include 'sidebar.latte'}
+
+            {if isset($clients)}
+                <div class="col-md-10 sidebar border-start">
+                    <div class="card shadow mt-2 mb-2">
+                        <div class="card-header">Seznam klientů</div>
+                        <div class="card-body table-responsive">
+                            <table class="table table-sm table-striped table-hover">
+                                <thead>
+                                <tr>
+                                    <th scope="col">ID</th>
+                                    <th scope="col">Jméno</th>
+                                    <th scope="col">Příjmení</th>
+                                    <th scope="col">Email</th>
+                                    <th></th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {foreach $clients as $cl}
+                                    <tr>
+                                        <th scope="row">{$cl->id}</th>
+                                        <td>{$cl->firstName}</td>
+                                        <td>{$cl->lastName}</td>
+                                        <td>{$cl->email}</td>
+                                        <td><a n:href="Clients:detail, $cl->id" class="btn-primary"><i class="bi bi-person-fill"></i></a></td>
+                                    </tr>
+                                {/foreach}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="card-footer">
+                            {if !$paginator->isFirst()}
+                                <a class="btn btn-outline-primary" n:href="default, 1">První</a>
+                                &nbsp;|&nbsp;
+                                <a class="btn btn-outline-primary" n:href="default, $paginator->page-1">Předchozí</a>
+                                &nbsp;|&nbsp;
+                            {/if}
+
+                                Stránka {$paginator->getPage()} z {$paginator->getPageCount()}
+
+	                        {if !$paginator->isLast()}
+                                &nbsp;|&nbsp;
+                                <a class="btn btn-outline-primary" n:href="default, $paginator->getPage() + 1">Další</a>
+                                &nbsp;|&nbsp;
+                                <a class="btn btn-outline-primary" n:href="default, $paginator->getPageCount()">Poslední</a>
+                            {/if}
+                        </div>
+                    </div>
+                </div>
+            {else}
+                <div class="col-md-10 sidebar border-start">
+                    <div class="alert alert-info mt-2" role="alert">
+                        Nebyl vybrán žádný klient
+                    </div>
+                </div>
+            {/if}
+        </div>
+    </div>
+{/block}
+{block page-js}
+    <script n:syntax="double">
+        $(function () {
+            /**
+             * Events
+             */
+
+        });
+    </script>
+{/block}

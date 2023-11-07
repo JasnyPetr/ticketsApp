@@ -1,0 +1,204 @@
+{layout '../@layout.latte'}
+{block content}
+    <!-- Modal -->
+    <div class="modal fade" id="scannedCodeModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="scannedCodeModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-fullscreen-sm-down">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="scannedCodeModalLabel">Informace o vstupence</h1>
+                </div>
+                <div class="modal-body">
+                    <div id="ticketInfo" class="alert text-center" role="alert">
+
+                    </div>
+                    <div class="d-grid gap-2">
+                        <button id="btnDecideOfTicket" class="btn btn-success mt-3 mb-3" type="button">Potvrdit</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Zrušit</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        canvas {
+            width: 100%;
+        }
+    </style>
+
+    <div class="container d-flex justify-content-center">
+        <div class="row">
+            <div class="col-12">
+                <div id="loadingMessage" class="alert alert-warning" role="alert">
+                    Nelze získat přístup k videostreamu (ujistěte se, že máte povolenou webovou kameru)
+                </div>
+                <canvas id="canvas" class="mt-2"></canvas>
+                <div id="output" hidden>
+                    <div id="outputMessage" class="alert alert-info" role="alert">
+                        Žádný QR kód nebyl nalezen.
+                    </div>
+                    <div hidden>
+                        <div id="outputData" class="alert alert-success" role="alert">
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{/block}
+{block page-js}
+    <script src="{$basePath}/js/jsQR.js"></script>
+    <script n:syntax="double">
+        $(function () {
+            let video = document.createElement("video");
+            let canvasElement = document.getElementById("canvas");
+            let canvas = canvasElement.getContext("2d");
+            let loadingMessage = document.getElementById("loadingMessage");
+            let outputContainer = document.getElementById("output");
+            let outputMessage = document.getElementById("outputMessage");
+            let outputData = document.getElementById("outputData");
+            let status = false;
+
+            function drawLine(begin, end, color) {
+                canvas.beginPath();
+                canvas.moveTo(begin.x, begin.y);
+                canvas.lineTo(end.x, end.y);
+                canvas.lineWidth = 4;
+                canvas.strokeStyle = color;
+                canvas.stroke();
+            }
+
+            // Use facingMode: environment to attemt to get the front camera on phones
+            navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }).then(function(stream) {
+                video.srcObject = stream;
+                video.setAttribute("playsinline", true); // required to tell iOS safari we don't want fullscreen
+                video.play();
+                requestAnimationFrame(tick);
+            });
+
+            function tick() {
+                loadingMessage.innerText = "Načítání kamery..."
+                if (video.readyState === video.HAVE_ENOUGH_DATA) {
+                    loadingMessage.hidden = true;
+                    canvasElement.hidden = false;
+                    outputContainer.hidden = false;
+
+                    canvasElement.height = video.videoHeight;
+                    canvasElement.width = video.videoWidth;
+                    canvas.drawImage(video, 0, 0, canvasElement.width, canvasElement.height);
+                    var imageData = canvas.getImageData(0, 0, canvasElement.width, canvasElement.height);
+                    var code = jsQR(imageData.data, imageData.width, imageData.height, {
+                        inversionAttempts: "dontInvert",
+                    });
+                    if (code) {
+                        drawLine(code.location.topLeftCorner, code.location.topRightCorner, "#FF3B58");
+                        drawLine(code.location.topRightCorner, code.location.bottomRightCorner, "#FF3B58");
+                        drawLine(code.location.bottomRightCorner, code.location.bottomLeftCorner, "#FF3B58");
+                        drawLine(code.location.bottomLeftCorner, code.location.topLeftCorner, "#FF3B58");
+                        outputMessage.hidden = true;
+                        outputData.parentElement.hidden = false;
+                        outputData.innerText = 'Data: ' + code.data;
+                        if (!status) {
+                            status = true;
+                            outputData.innerText = 'Analyzuji ' + code.data;
+                            analyzeLoadedCode(code.data);
+                        }
+
+                    } else {
+                        outputMessage.hidden = false;
+                        outputData.parentElement.hidden = true;
+                    }
+                }
+                if (!status) {
+                    requestAnimationFrame(tick);
+                }
+            }
+
+            let analyzeLoadedCode = function (qrcode) {
+                ajaxCall({{link analyzeLoadedCode!}}, {
+                    qrcode: qrcode
+                }, 'GET').then(function (response) {
+                    if (response !== false) {
+                        console.log(response);
+                        for (let item of response) {
+                            let html = '<h3 class="alert-heading">';
+                            if (item.inDate && item.isActive) {
+                                $('#ticketInfo').addClass('alert-success');
+                                html += 'Vstupenka je platná pro dnešní akci</h3>';
+                                $('#btnDecideOfTicket').removeClass('d-none');
+                            }else if(item.inDate == false && item.isActive){
+                                $('#ticketInfo').addClass('alert-warning');
+                                html += 'Vstupenka je platná pro jinou akci</h3>';
+                                $('#btnDecideOfTicket').addClass('d-none');
+                            }else if (item.inDate && item.isActive == false) {
+                                $('#ticketInfo').addClass('alert-danger');
+                                html += 'Vstupenka je NEPLATNÁ</h3>';
+                                $('#btnDecideOfTicket').addClass('d-none');
+                            } else {
+                                $('#ticketInfo').addClass('alert-danger');
+                                html += 'Vstupenka je NEPLATNÁ</h3>';
+                                $('#btnDecideOfTicket').addClass('d-none');
+                            }
+
+                            html += '<hr>';
+                            html += '<p><strong>' + item.actionName + '</strong></p>';
+                            html += '<br>';
+                            html += '<p>Vystavena pro: <a href="'+item.clientLink+'" class="alert-link">' + item.firstName + ' ' + item.lastName + '</a></p>';
+                            $('#ticketInfo').html(html);
+                        }
+                        $('#scannedCodeModal').attr('data-qrcode', qrcode);
+                        $('#scannedCodeModal').modal('show');
+                    }else{
+                        alert('QR kód nebyl nalezen');
+                        status = false;
+                        requestAnimationFrame(tick);
+                    }
+                }).catch(function (error) {
+                    alert('Nastala chyba...kontaktujte správce');
+                    status = false;
+                    requestAnimationFrame(tick);
+                    console.log(error);
+                });
+            };
+
+            $('#btnDecideOfTicket').on('click', function () {
+                let qrcode = $('#scannedCodeModal').attr('data-qrcode');
+
+                if (qrcode !== undefined) {
+                    ajaxCall({{link decideOfTicket!}}, {
+                        qrcode: qrcode
+                    }, 'GET').then(function (response) {
+                        if (response !== false) {
+                            $('#btnDecideOfTicket').addClass('d-none');
+                            $('#ticketInfo').empty();
+                            $('#ticketInfo').append('<h3 class="alert-heading">Vstupenka byla potvrzena</h3>');
+                            setTimeout(function () {
+                                $('#scannedCodeModal').modal('hide');
+                            },1500);
+                        }else{
+                            $('#btnDecideOfTicket').addClass('d-none');
+                            $('#ticketInfo').empty();
+                            $('#ticketInfo').removeClass('alert-success').addClass('alert-danger');
+                            $('#ticketInfo').append('<h3 class="alert-heading">Vstupenka NEBYLA potvrzena</h3>');
+                            setTimeout(function () {
+                                $('#scannedCodeModal').modal('hide');
+                            },1500);
+                        }
+                    }).catch(function (error) {
+                        alert('Nastala chyba...kontaktujte správce');
+                        status = false;
+                        requestAnimationFrame(tick);
+                        console.log(error);
+                    });
+                }
+            });
+
+            $('#scannedCodeModal').on('hide.bs.modal', function () {
+                $('#ticketInfo').empty().removeClass().addClass('alert text-center');
+                status = false;
+                requestAnimationFrame(tick);
+            });
+        });
+    </script>
+{/block}

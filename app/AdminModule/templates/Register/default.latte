@@ -1,0 +1,68 @@
+{layout '../@no-layout.latte'}
+{block content}
+    <style>
+        html,
+        body {
+            height: 100%;
+        }
+        .form-login {
+            max-width: 330px;
+            padding: 1rem;
+        }
+        .form-login .form-floating:focus-within {
+            z-index: 2;
+        }
+
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 80vh; /* Nastavte výšku na 100% viewportu */
+        }
+
+    </style>
+    <div class="container">
+        <div class="form-login w-100 m-auto">
+            {snippet registerFormSnippet}
+                <form n:name=registerForm autocomplete="off">
+                    <img src="{$basePath}/images/ticket_logo-removebg.png" alt="logo" width="200"  class="d-block mx-auto mb-4">
+                    <h3 class="h3 text-center">Registrace</h3>
+                    <div class="form-floating">
+                        <input type="text" class="form-control" n:name="first_name" placeholder="{$form['first_name']->caption}">
+                        <label for="floatingInput">{$form['first_name']->caption}</label>
+                    </div>
+                    <div class="form-floating">
+                        <input type="text" class="form-control mt-1" n:name="last_name" placeholder="{$form['last_name']->caption}">
+                        <label for="floatingInput">{$form['last_name']->caption}</label>
+                    </div>
+                    <div class="form-floating">
+                        <input type="text" class="form-control mt-1" n:name="nick_name" placeholder="{$form['nick_name']->caption}">
+                        <label for="floatingInput">{$form['nick_name']->caption}</label>
+                    </div>
+                    <div class="form-floating">
+                        <input type="text" class="form-control mt-1" n:name="username" placeholder="{$form['username']->caption}">
+                        <label for="floatingInput">{$form['username']->caption}</label>
+                    </div>
+                    <div class="form-floating">
+                        <input type="password" class="form-control mt-1 {if $form['password']->getError()}is-invalid{/if}" n:name="password" placeholder="{$form['password']->caption}">
+                        <label >{$form['password']->caption}</label>
+                    </div>
+                    <div class="form-floating">
+                        <input type="password" class="form-control mt-1 {if $form['password_confirm']->getError()}is-invalid{/if}" n:name="password_confirm" placeholder="{$form['password_confirm']->caption}">
+                        <label >{$form['password_confirm']->caption}</label>
+                    </div>
+                    <button class="btn btn-primary w-100 py-2 mt-2" n:name="register" type="submit">{$form['register']->caption}</button>
+                </form>
+            {/snippet}
+        </div>
+    </div>
+
+{/block}
+{block page-js}
+    <script n:syntax="double">
+        $(function () {
+
+        });
+    </script>
+{/block}
+```

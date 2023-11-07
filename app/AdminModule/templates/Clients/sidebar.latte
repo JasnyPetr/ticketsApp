@@ -1,0 +1,60 @@
+{block sidebar}
+    <style>
+        @media(min-width: 992px){
+            .sidebar{
+                height: 92vh;
+            }
+        }
+
+    </style>
+
+    <!-- Modal -->
+    <div class="modal fade" id="addNewClient" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="addNewClientLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="addNewClientLabel">Založení nového klienta</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form n:name="addNewClientForm" autocomplete="off">
+                    <div class="modal-body">
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" n:name="firstName" placeholder="{$form['firstName']->caption}">
+                            <label>{$form['firstName']->caption}</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" n:name="lastName" placeholder="{$form['lastName']->caption}">
+                            <label>{$form['lastName']->caption}</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" n:name="email" placeholder="{$form['email']->caption}">
+                            <label>{$form['email']->caption}</label>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Zavřít</button>
+                        <button n:name="save" class="btn btn-success">Uložit</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-2 bg-body-tertiary border-end sidebar">
+        <div class="d-grid gap-2 mt-2 mb-2">
+            <button id="btnAddNewClient" class="btn btn-sm btn-outline-primary">Založit nového klienta</button>
+        </div>
+    </div>
+
+    <script src="{$basePath}/js/jquery.min.js"></script>
+    <script n:syntax="double">
+        $(function () {
+            /**
+             * Events
+             */
+            $('#btnAddNewClient').click(function () {
+                $('#addNewClient').modal('show');
+            });
+        });
+    </script>
+{/block}

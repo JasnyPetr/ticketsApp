@@ -1,0 +1,426 @@
+{layout '../@layout.latte'}
+{block content}
+    <!-- Modal -->
+    <div class="modal fade" id="sendEmailModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="sendEmailLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="sendEmailLabel">Email</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="subject" class="form-label">Předmět</label>
+                        <input type="text" class="form-control" id="subject" placeholder="Předmět">
+                    </div>
+                    <div class="mb-3">
+                        <label for="emailText" class="form-label">Text emailu</label>
+                        <textarea class="form-control" id="emailText" rows="5" placeholder="Text"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="btnCloseEmailModal" type="button" class="btn btn-secondary" data-bs-dismiss="modal">Zavřít</button>
+                    <button id="sendEmail" type="button" class="btn btn-success">Odeslat</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="addNewTicketModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="addNewTicketModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="addNewTicketModalLabel">Nová vstupenka</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <select id="selectAction" class="form-select" aria-label="Vyberte akci">
+                            <option value="0">Vyberte akci</option>
+                            {if isset($actions) && $actions != false}
+                                {foreach $actions as $action}
+                                    <option value="{$action->id}">{$action->name}</option>
+                                {/foreach}
+                            {/if}
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="btnCloseAddNewTicketModal" type="button" class="btn btn-secondary" data-bs-dismiss="modal">Zavřít</button>
+                    <button id="btnAddNewTicket" type="button" class="btn btn-success">Vydat vstupenku</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="viewQrCodeModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="viewQrCodeModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="viewQrCodeModalLabel">Qr Code</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body d-flex justify-content-center">
+                    <img src="">
+                </div>
+                <div class="modal-footer">
+                    <button id="btnCloseViewQrCodeModal" type="button" class="btn btn-secondary" data-bs-dismiss="modal">Zavřít</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container-fluid">
+        <div class="row">
+            {include 'sidebar.latte'}
+            {if isset($client) && $client != false}
+            <div class="col-md-4 sidebar">
+                <div class="card shadow mt-2 mb-2">
+                    <div class="card-header">Profil klienta #{$client[0]->id}</div>
+                    <div class="card-body">
+                        <form n:name="clientForm" autocomplete="off">
+                            <input n:name="id">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control" n:name="firstName" placeholder="{$form['firstName']->caption}">
+                                <label>{$form['firstName']->caption}</label>
+                            </div>
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control" n:name="lastName" placeholder="{$form['lastName']->caption}">
+                                <label>{$form['lastName']->caption}</label>
+                            </div>
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control" n:name="email" placeholder="{$form['email']->caption}">
+                                <label>{$form['email']->caption}</label>
+                            </div>
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                <a id="btnSendEmailModal" class="btn btn-outline-info me-md-2" type="button" title="Odeslat email"><i class="bi bi-envelope-at-fill"></i></a>
+                                <button n:name="save" class="btn btn-success" type="submit">Uložit změny</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 sidebar border-start">
+                <div class="card shadow mt-2 mb-2">
+                    <div class="card-header">Podrobnosti</div>
+                    <div class="card-body">
+                        <div class="accordion mt-2 mb-2" id="accordionDetails">
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#tickets" aria-expanded="true" aria-controls="tickets">
+                                        Vstupenky
+                                    </button>
+                                </h2>
+                                <div id="tickets" class="accordion-collapse collapse show" data-bs-parent="#accordionDetails">
+                                    <div class="accordion-body table-responsive">
+                                        <p><a id="btnAddNewTicketModalOpen" class="btn btn-sm btn-outline-primary">Nová vstupenka</a></p>
+                                        <table id="tbTickets" class="table table-sm">
+                                            <thead>
+                                                <tr>
+                                                    <th scope="col">ID</th>
+                                                    <th scope="col">Kód</th>
+                                                    <th scope="col">Název akce</th>
+                                                    <th scope="col">Stav</th>
+                                                    <th scope="col"></th>
+                                                    <th scope="col"></th>
+                                                    <th scope="col"></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {if isset($tickets) && $tickets != false}
+                                                    {foreach $tickets as $ticket}
+                                                        <tr data-id="{$ticket->id}" data-path="{$ticket->path}" data-action-name="{$ticket->actionName}">
+                                                            <td scope="row">{$ticket->id}</td>
+                                                            <td>{$ticket->code}</td>
+                                                            <td>{$ticket->actionName}</td>
+                                                            <td><a class="btn {$ticket->isActive ? 'text-success' : 'text-danger'} activity-ticket p-0 m-0" title="{$ticket->isActive ? 'Aktivní' : 'Neaktivní'}"><i class="bi bi-circle-fill"></i></a></td>
+                                                            <td><a class="btn qr-code btn-sm text-dark p-0 m-0" title="Zobrazit qrcode"><i class="bi bi-qr-code"></i></a></td>
+                                                            <td><a class="btn {$ticket->isActive ? 'send-email-with-qrcode' : 'text-muted'} btn-sm text-info p-0 m-0" title="Odeslat vstupenku emailem"><i class="bi bi-envelope-at"></i></a></td>
+                                                            <td><a class="btn delete-ticket btn-sm text-danger p-0 m-0" title="Smazat vstupenku"><i class="bi bi-trash3"></i></a></td>
+                                                        </tr>
+                                                    {/foreach}
+                                                {else}
+                                                    <tr>
+                                                        <td colspan="7" class="text-center">
+                                                            <div class="alert alert-info" role="alert">
+                                                                Klient nemá žádné vstupenky
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                {/if}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {else}
+                <div class="col-md-10 sidebar border-start">
+                    <div class="alert alert-info mt-2" role="alert">
+                        Nebyl vybrán žádný klient nebo neexistuje
+                    </div>
+                </div>
+            {/if}
+        </div>
+    </div>
+
+{/block}
+{block page-js}
+    <script n:syntax="double">
+        $(function () {
+            /**
+             * Function
+             */
+
+            // Function for clean ticket modal
+            let cleanTicketModal = function () {
+                $('#addNewTicketModal #selectAction').val(0);
+            };
+
+            // Function for cleaning send email modal
+            let cleanEmailModal = function () {
+                $('#sendEmailModal').attr('data-client-email', '');
+                $('#sendEmailModal #subject').val('');
+                $('#sendEmailModal #emailText').val('');
+            };
+
+
+            /**
+             * Events
+             */
+
+            // Function for delete ticket
+            $('#tbTickets .delete-ticket').on('click', function () {
+                let currentRow = $(this).closest('tr');
+                let ticketPath = currentRow.attr('data-path');
+                let ticketId = parseInt(currentRow.attr('data-id'));
+
+                if (confirm('Opravdu si přejete smazat vstupenku?')) {
+                    ajaxCall({{link deleteTicket!}}, {
+                        ticketId: ticketId,
+                        ticketPath: ticketPath
+                    }, 'GET').then(function (response) {
+                        if (response) {
+                            appendAlert('Vstupenka smazána', 'success');
+                            setTimeout(function () {
+                                $(".alert").fadeTo(2000, 500).slideUp(500, function(){
+                                    $(".alert").slideUp(500);
+                                });
+                                window.location.reload();
+                            },1500);
+                        }else{
+                            appendAlert('Vstupenku se nepodařilo smazat', 'warning');
+                            setTimeout(function () {
+                                $(".alert").fadeTo(2000, 500).slideUp(500, function(){
+                                    $(".alert").slideUp(500);
+                                });
+                            },3000);
+                        }
+                    }).catch(function (err) {
+                        appendAlert('Při mazání nastala neočekávaná chyba...kontaktujte správce', 'danger');
+                        setTimeout(function () {
+                            $(".alert").fadeTo(2000, 500).slideUp(500, function(){
+                                $(".alert").slideUp(500);
+                            });
+                        },3000);
+                        console.log(err);
+                    });
+                }
+
+
+            });
+
+            // Function for send email with qr code
+            $('#tbTickets .send-email-with-qrcode').on('click', function () {
+                let currentRow = $(this).closest('tr');
+                let actionName = currentRow.attr('data-action-name');
+                let clientEmail = $('#frm-clientForm input[name="email"]').val();
+                let ticketPath = currentRow.attr('data-path');
+
+                ajaxCall({{link sendEmailWithQrcode!}}, {
+                    actionName: actionName,
+                    clientEmail: clientEmail,
+                    ticketPath: ticketPath
+                }, 'POST').then(function (response) {
+                    if (response) {
+                        appendAlert('Vstupenka odeslána.', 'success');
+                        setTimeout(function () {
+                            $(".alert").fadeTo(2000, 500).slideUp(500, function(){
+                                $(".alert").slideUp(500);
+                            });
+                        },1500);
+                    } else {
+                        appendAlert('Vstupenku se nepodařilo odeslat', 'warning');
+                        setTimeout(function () {
+                            $(".alert").fadeTo(2000, 500).slideUp(500, function(){
+                                $(".alert").slideUp(500);
+                            });
+                        },3000);
+                    }
+                }).catch(function (err) {
+                    appendAlert('Při odeslání nastala neočekávaná chyba...kontaktujte správce', 'danger');
+                    setTimeout(function () {
+                        $(".alert").fadeTo(2000, 500).slideUp(500, function(){
+                            $(".alert").slideUp(500);
+                        });
+                    },3000);
+                    console.log(err);
+                });
+            });
+
+            // Function for view qr code
+            $('#tbTickets .qr-code').on('click', function () {
+                let currentRow = $(this).closest('tr');
+                let codePath = currentRow.attr('data-path');
+
+                $('#viewQrCodeModal img').attr('src', 'https://' + window.location.hostname + '/www/' + codePath);
+                $('#viewQrCodeModal').modal('show');
+            });
+
+            // Function for change status of ticket
+            $('#tbTickets .activity-ticket').on('click', function () {
+                let currentRow = $(this).closest('tr');
+                let ticketId = parseInt(currentRow.attr('data-id'));
+
+                if (confirm('Opravdu chcete změnit stav vstupenky?')) {
+                    ajaxCall({{link changeTicketStatus!}}, {
+                        ticketId:ticketId
+                    }, 'GET').then(function (response) {
+                        if (response) {
+                            appendAlert('Stav vstupenky změněn.', 'success');
+                            setTimeout(function () {
+                                $(".alert").fadeTo(2000, 500).slideUp(500, function(){
+                                    $(".alert").slideUp(500);
+                                });
+                                window.location.reload();
+                            },1500);
+                        }else{
+                            appendAlert('Nepodařilo se změnit stav vstupenky...kontaktujte správce', 'warning');
+                            setTimeout(function () {
+                                $(".alert").fadeTo(2000, 500).slideUp(500, function(){
+                                    $(".alert").slideUp(500);
+                                });
+                            },3000);
+                        }
+                    }).catch(function (err) {
+                        appendAlert('Nastala chyba...kontaktujte správce', 'danger');
+                        setTimeout(function () {
+                            $(".alert").fadeTo(2000, 500).slideUp(500, function(){
+                                $(".alert").slideUp(500);
+                            });
+                        },3000);
+                        console.log(err);
+                    });
+                }
+            });
+
+            // Add new ticket
+            $('#btnAddNewTicket').on('click', function () {
+                let selectedActionId = parseInt($('#selectAction').val());
+                let clientId = parseInt($('#frm-clientForm input[name="id"]').val());
+
+                if (selectedActionId === 0) {
+                    alert('Vyberte akci!');
+                    return false;
+                }
+
+                ajaxCall({{link createNewTicket!}}, {
+                    actionId: selectedActionId,
+                    clientId: clientId
+                }, 'GET').then(function (response) {
+                    if (response === true) {
+                        $('#addNewTicketModal').modal('hide');
+                        appendAlert('Vstupenka byla vydána.', 'success');
+                        setTimeout(function () {
+                            $(".alert").fadeTo(2000, 500).slideUp(500, function(){
+                                $(".alert").slideUp(500);
+                            });
+                            window.location.reload();
+                        },1500);
+                    }else{
+                        appendAlert('Vstupenka nebyla vydána...kontaktujte správce.', 'warning');
+                        setTimeout(function () {
+                            $(".alert").fadeTo(2000, 500).slideUp(500, function(){
+                                $(".alert").slideUp(500);
+                            });
+                        },3000);
+                    }
+                }).catch(function (err) {
+                    appendAlert('Nastala chyba...kontaktujte správce.', 'danger');
+                    setTimeout(function () {
+                        $(".alert").fadeTo(2000, 500).slideUp(500, function(){
+                            $(".alert").slideUp(500);
+                        });
+                    },3000);
+                });
+            });
+
+            // Open AddNewTicket modal
+            $('#btnAddNewTicketModalOpen').on('click', function () {
+                cleanTicketModal();
+                $('#selectAction option:eq(1)').prop('selected', true);
+                $('#addNewTicketModal').modal('show');
+            });
+
+            // Open email send modal
+            $('#btnSendEmailModal').on('click', function(){
+                let clientEmail = $('#frm-clientForm input[name="email"]').val();
+                cleanEmailModal();
+                $('#sendEmailModal').attr('data-client-email', clientEmail);
+                $('#sendEmailModal').modal('show');
+            });
+
+            // Function for send email
+            $('#sendEmail').on('click', function () {
+                let clientEmail = $('#sendEmailModal').attr('data-client-email');
+                let subject = $('#sendEmailModal #subject').val();
+                let emailText = $('#sendEmailModal #emailText').val();
+
+
+                if(subject.length === 0) {
+                    alert('Vyplňte předmět!');
+                    return false;
+                }
+                if (emailText.length === 0) {
+                    alert('Uveďte text emailu!');
+                    return false;
+                }
+
+                $('#sendEmailModal').modal('hide');
+
+                ajaxCall({{link sendEmail!}}, {
+                    forEmail: clientEmail,
+                    subject: subject,
+                    emailText: emailText
+                }, 'POST').then(function (payload) {
+                    if (payload) {
+                        appendAlert('Email byl odeslán.', 'success');
+                        setTimeout(function () {
+                            $(".alert").fadeTo(2000, 500).slideUp(500, function(){
+                                $(".alert").slideUp(500);
+                            });
+                        },1500);
+                    }else{
+                        appendAlert('Email nebyl odeslán.', 'warning');
+                        setTimeout(function () {
+                            $(".alert").fadeTo(2000, 500).slideUp(500, function(){
+                                $(".alert").slideUp(500);
+                            });
+                        },3000);
+                    }
+                }).catch(function (err) {
+                    appendAlert('Nastala chyba...kontaktujte správce.', 'danger');
+                    setTimeout(function () {
+                        $(".alert").fadeTo(2000, 500).slideUp(500, function(){
+                            $(".alert").slideUp(500);
+                        });
+                    },3000);
+                });
+
+            });
+        });
+    </script>
+{/block}

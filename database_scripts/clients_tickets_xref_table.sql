@@ -1,0 +1,2 @@
+CREATE TABLE `clients_tickets_xref` (`client_id` INT NOT NULL , `ticket_id` INT NOT NULL , `timestamp` TIMESTAMP NOT NULL , INDEX (`client_id`) USING BTREE, INDEX (`ticket_id`) USING BTREE) ENGINE = InnoDB;
+ALTER TABLE `clients_tickets_xref` ADD FOREIGN KEY (`client_id`) REFERENCES `clients`(`id`) ON DELETE CASCADE ON UPDATE CASCADE; ALTER TABLE `clients_tickets_xref` ADD FOREIGN KEY (`ticket_id`) REFERENCES `tickets`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;

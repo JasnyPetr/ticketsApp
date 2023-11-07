@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="cs" data-bs-theme="light">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link href="{$basePath}/css/bootstrap.min.css" rel="stylesheet">
+	<link href="{$basePath}/bootstrap-icons/bootstrap-icons.min.css" rel="stylesheet">
+	<link href="{$basePath}/css/admin.css" rel="stylesheet">
+	<link rel="icon" type="image/png" sizes="16x16" href="/images/ticket_logo.png">
+	<title>{ifset $title}{$title}{/ifset}</title>
+</head>
+
+<body>
+	<div n:foreach="$flashes as $flash" class="alert alert-{$flash->type}" role="alert">{$flash->message}</div>
+
+	<div class="container">
+		<div class="dropdown dropup position-fixed bottom-0 end-0 mb-3 me-3 bd-mode-toggle">
+			<button class="btn btn-link nav-link py-2 dropdown-toggle d-flex align-items-center" id="bd-theme" type="button" aria-expanded="false" data-bs-toggle="dropdown" data-bs-display="static" aria-label="Toggle theme (dark)">
+				<i id="bd-theme-icon" class="bi"></i>
+			</button>
+			<ul class="dropdown-menu dropdown-menu-end" aria-labelledby="bd-theme-text">
+				<li>
+					<button type="button" class="dropdown-item d-flex align-items-center" data-bs-theme-value="light" data-bs-theme-icon="bi-sun-fill" aria-pressed="false">
+						<i class="bi bi-sun-fill me-2"></i>
+						<span>Světlý</span>
+					</button>
+				</li>
+				<li>
+					<button type="button" class="dropdown-item d-flex align-items-center" data-bs-theme-value="dark" data-bs-theme-icon="bi-moon-stars-fill" aria-pressed="true">
+						<i class="bi bi-moon-stars-fill me-2"></i>
+						Tmavý
+					</button>
+				</li>
+			</ul>
+		</div>
+		{include content}
+	</div>
+
+	{block scripts}
+		<script src="{$basePath}/js/popper.min.js"></script>
+		<script src="{$basePath}/js/bootstrap.min.js"></script>
+		<script src="{$basePath}/js/Naja.min.js"></script>
+		<script src="{$basePath}/js/popper.min.js"></script>
+		<script src="{$basePath}/js/jquery.min.js"></script>
+		<script src="https://nette.github.io/resources/js/3/netteForms.min.js"></script>
+	{/block}
+	<script n:syntax="double">
+
+
+		$(function () {
+			naja.initialize();
+
+			let theme = $('html');
+			let selectedTheme = theme.attr('data-bs-theme');
+			let localStorageTheme = localStorage.getItem('theme');
+
+			if (localStorageTheme === null) {
+				if (selectedTheme === 'dark') {
+					$('#bd-theme-icon').removeClass().addClass('bi bi-moon-stars-fill');
+				} else {
+					$('#bd-theme-icon').removeClass().addClass('bi bi-sun-fill');
+				}
+			} else {
+				if (localStorageTheme === 'dark') {
+					$('#bd-theme-icon').removeClass().addClass('bi bi-moon-stars-fill');
+					theme.attr('data-bs-theme', localStorageTheme);
+				} else {
+					$('#bd-theme-icon').removeClass().addClass('bi bi-sun-fill');
+					theme.attr('data-bs-theme', localStorageTheme);
+				}
+			}
+
+			$('.dropdown-menu button').on('click', function () {
+				let selectTheme = $(this).attr('data-bs-theme-value');
+				let selectThemeIcon = $(this).attr('data-bs-theme-icon');
+				theme.attr('data-bs-theme', selectTheme);
+				localStorage.setItem('theme', selectTheme);
+				$('#bd-theme-icon').removeClass().addClass('bi ' + selectThemeIcon);
+			});
+
+			$('#btnSearch').on('click', function (e) {
+
+			});
+		});
+	</script>
+	{ifset page-js}
+		{include page-js}
+	{/ifset}
+</body>
+</html>
