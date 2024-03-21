@@ -1,0 +1,13 @@
+Ceníme práci na projektu! 🏆 Prohlédli jsme si kód a máme k němu následující poznámky:
+
+1. Pojmenování identifikátorů - identifikátorů je spousta, těžko rozeznatelné, které jsou dané knihovnami a které vlastní. Občas drobné prohřešky dané použitím angličtiny (např. decideOfTicket? nebo countTickets - takto by mělo jít o metodu, co něco počítá, pokud jde o vlastnost, tj. podstatné jméno, pak ticketCount je lepší)
+2. Dodržení principů SRP a SoC - dané frameworkem, který má navíc vlastní pravidla. Přesto bych si myslel, že by šlo lépe oddělit model a prezenter. Cílem je, aby změna implementace (např. db, struktury dat apod.) byla provedena na JEDNOM místě a neovlivnila jiné oblasti.
+3. Vhodný výběr datových typů - kde? Možná entity? Tady mám celkově problém, vypadá to, že třídy si nadefinují nějaké atributy, které se v nich ale nikde nepoužívají, a naopak konstruktor bere úplně jiná data a opět si je vkládá do instance - tímto způsobem vzniká něco obtížně uchopitelného a obvykle se tomuto přístupu snažíme vyhnout. Je entita Ticket vlastně vazební tabulkou mezi akcí Action a klientem Client? Pak by spíš měla mít jako svá data odkaz na akci a klienta, nikoli jejich jednotlivá data (jméno, příjmení, datum apod.)
+4. Formátování kódu - občas rozsypané
+5. Duplicitní kód a nekonečné cykly - zejména repository vypadají hodně copy&paste, možná by šlo velkou část duplicit vložit do base třídy, stačilo by v konstruktoru předat druhý parametr, jméno tabulky, a nabízet funkce jako getCount(), getAll(), getById(), delete(), možná i getByFilter() nebo další
+6. Validace vstupních dat - validátor na e-mail, pravděpodobně převzatý
+7. Logičnost a složitost - Škoda standardního Readme.md z Nette, popis toho, co aplikace dělá, umí nebo jak pracuje s daty, by se pro případného zájemce docela hodil.
+8. Komentáře - minimum nebo nenalezeny
+9. Celkové hodnocení - zajímavá Nette aplikace, ovšem trochu to vypadá, že se v celém frameworku ztratily základní zásady a OOP přístup.
+
+Doporučujeme případné výtky v kódu opravit, abyste jej mohli pak prezentovat budoucímu zaměstnavateli v co nejlepší kvalitě. Pokud byste potřebovali s čímkoli pomoci, naplánujte si s námi konzultaci, rádi vám poradíme!
