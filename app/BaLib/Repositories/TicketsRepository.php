@@ -1,8 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\BaLib\Repositories;
 
 use App\BaLib\Base\Repository;
+use Tracy\Debugger;
+use Tracy\ILogger;
 
 class TicketsRepository extends Repository
 {
@@ -38,14 +42,25 @@ class TicketsRepository extends Repository
         return $this->database->fetchAll('SELECT tickets.*, actions.name as actionName FROM tickets LEFT JOIN clients_tickets_xref AS ctx ON ctx.ticket_id = tickets.id LEFT JOIN actions ON actions.id = tickets.action_id WHERE ctx.client_id = ?', $clientId);
     }
 
-    public function insertNewTicket($tiket)
+    public function updateTicketsStatusByActionId($actionId, $isActive)
+    {
+        try {
+            $this->database->query('UPDATE tickets SET is_active = ? WHERE action_id = ?', $isActive, $actionId);
+            return true;
+        } catch (\Exception $e) {
+            Debugger::log($e->getMessage(), ILogger::ERROR);
+            return false;
+        }
+    }
+
+    public function insertNewTicket($ticket)
     {
         try {
             $this->database->query('INSERT INTO tickets ?', [
-                'action_id' => $tiket->actionId,
-                'code' => $tiket->code,
-                'path' => $tiket->path,
-                'is_active' => $tiket->isActive
+                'action_id' => $ticket->actionId,
+                'code' => $ticket->code,
+                'path' => $ticket->path,
+                'is_active' => $ticket->isActive
             ]);
             return $this->database->getInsertId();
         }catch (\Exception $e) {

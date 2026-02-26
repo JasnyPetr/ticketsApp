@@ -1,10 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Model;
 
 use Nette;
-use App\FsLib\Communications\EmailSender;
+use App\BaLib\Communications\EmailSender;
 use Nette\Bridges\ApplicationLatte\ILatteFactory;
+use Tracy\Debugger;
+use Tracy\ILogger;
+
 class EmailsManager
 {
     private $latteFactory;
@@ -24,7 +29,7 @@ class EmailsManager
 
             $emailSender = new EmailSender('kontakt@fyzioklinika.cz', $forEmail, false);
             $emailSender->setSubject($subject);
-            $emailSender->setBody($latte->renderToString(__DIR__ . '/email.latte', array('content' => $emailText)));
+            $emailSender->setBody($latte->renderToString(__DIR__ . '/email.latte', ['content' => $emailText]));
             $emailSender->sendMail();
             return true;
         }catch (\Exception $e){
@@ -41,7 +46,7 @@ class EmailsManager
 
             $emailSender = new EmailSender('kontakt@fyzioklinika.cz', $clientEmail, false);
             $emailSender->setSubject('Vstupenka na "' . $actionName . '"');
-            $emailSender->setBody($latte->renderToString(__DIR__ . '/ticket_email.latte', array('imagePath' => $ticketPath, 'actionName' => $actionName)));
+            $emailSender->setBody($latte->renderToString(__DIR__ . '/ticket_email.latte', ['imagePath' => $ticketPath, 'actionName' => $actionName]));
             $emailSender->setAttachment($ticketPath, $fileName);
             $emailSender->sendMail();
             return true;

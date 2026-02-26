@@ -16,12 +16,10 @@ final class RouterFactory
 	{
 		$router = new RouteList;
         $router->withModule('Admin')
-            ->addRoute('admin/<presenter>/<action>[/<id>]', 'Homepage:default')
-            ->addRoute('<presenter>/<action>[/<id>]', 'Homepage:default');
+            ->addRoute('admin/<presenter>/<action>[/<id>]', 'Homepage:default');
 
         $router->withModule('Front')
             ->addRoute('Scanner', 'Scanner:default');
-		//$router->addRoute('<presenter>/<action>[/<id>]', 'Homepage:default');
 		return $router;
 	}
 }

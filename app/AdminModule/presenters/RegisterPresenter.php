@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\AdminModule\presenters;
 
 use App\Model\UsersManager;
@@ -12,10 +14,17 @@ class RegisterPresenter extends \Nette\Application\UI\Presenter
     public function __construct
     (
         UsersManager $usersManager
-
     )
     {
         $this->usersManager = $usersManager;
+    }
+
+    public function startup(): void
+    {
+        parent::startup();
+        if (!$this->getUser()->isLoggedIn()) {
+            $this->redirect('Login:default');
+        }
     }
 
     public function beforeRender()
@@ -39,6 +48,7 @@ class RegisterPresenter extends \Nette\Application\UI\Presenter
         $form->addPassword('password_confirm', 'Potvrzení hesla')
             ->setRequired('Zadejte heslo znovu.');
         $form->addSubmit('register', 'Registrovat se');
+        $form->addProtection('Vypršel časový limit, odešlete formulář znovu.');
 
         $form->onValidate[] = [$this, 'registerFormValidate'];
         $form->onSuccess[] = [$this, 'registerFormSucceeded'];
@@ -68,8 +78,8 @@ class RegisterPresenter extends \Nette\Application\UI\Presenter
             $form['username']->addError('Uživatelské jméno je již zabrané.');
             $this->redrawControl('registerFormSnippet');
         }
-        if ($values->password != $values->password_confirm) {
-            $form['password2']->addError('Hesla se neshodují.');
+        if ($values->password !== $values->password_confirm) {
+            $form['password_confirm']->addError('Hesla se neshodují.');
             $this->redrawControl('registerFormSnippet');
         }
     }

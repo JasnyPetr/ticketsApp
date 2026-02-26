@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\BaLib\Repositories;
 
 use App\BaLib\Base\Repository;

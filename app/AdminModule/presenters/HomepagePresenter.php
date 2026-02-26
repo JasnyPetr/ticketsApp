@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\AdminModule\presenters;
 
 use App\BaLib\Interfaces\IClientSearch;
@@ -17,6 +19,14 @@ final class HomepagePresenter extends Nette\Application\UI\Presenter implements 
         $this->clientsManager = $clientsManager;
     }
 
+    public function startup(): void
+    {
+        parent::startup();
+        if (!$this->getUser()->isLoggedIn()) {
+            $this->redirect('Login:default');
+        }
+    }
+
     public function beforeRender()
     {
         $this->template->title = 'Home';
@@ -26,9 +36,6 @@ final class HomepagePresenter extends Nette\Application\UI\Presenter implements 
 
     public function renderDefault()
     {
-        if(!$this->getUser()->isLoggedIn()){
-            $this->redirect('Login:default');
-        }
     }
 
     public function handleSearch($searchedText)

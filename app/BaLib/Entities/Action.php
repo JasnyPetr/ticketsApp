@@ -1,10 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\BaLib\Entities;
 
 class Action
 {
     public int $id;
+    public string $name;
+    public string $dateEvent;
+    public bool $isActive;
     public int $countTickets;
     public int $countTicketsUsed;
 

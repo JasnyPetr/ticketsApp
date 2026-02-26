@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\AdminModule\presenters;
 
 use App\BaLib\Interfaces\IClientSearch;
@@ -21,12 +23,16 @@ class ScannerPresenter extends Nette\Application\UI\Presenter implements IClient
         $this->ticketsManager = $ticketsManager;
     }
 
-    public function beforeRender()
+    public function startup(): void
     {
-        if (!$this->getUser()->isLoggedIn()){
+        parent::startup();
+        if (!$this->getUser()->isLoggedIn()) {
             $this->redirect('Login:default');
         }
+    }
 
+    public function beforeRender()
+    {
         $this->template->title = 'Scanner';
         $this->template->pageClass = str_replace('Admin:', '', $this->getName()) . $this->getAction();
         $this->template->user = $this->getUser()->getIdentity();

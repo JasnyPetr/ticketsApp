@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\AdminModule\presenters;
 
 use Nette;
@@ -30,6 +32,7 @@ class LoginPresenter extends \Nette\Application\UI\Presenter
         $form->addPassword('password', 'Heslo')
             ->setRequired('Zadejte heslo.');
         $form->addSubmit('login', 'Přihlásit se');
+        $form->addProtection('Vypršel časový limit, odešlete formulář znovu.');
         $form->onSuccess[] = [$this, 'loginFormSucceeded'];
 
         return $form;
@@ -38,7 +41,6 @@ class LoginPresenter extends \Nette\Application\UI\Presenter
     public function loginFormSucceeded($form, $values)
     {
         try {
-            //$this->usersManager->loginUser($values->username, $values->password);
             $this->getUser()->login($values->username, $values->password);
             $this->redirect('Homepage:default');
         } catch (Nette\Security\AuthenticationException $e) {

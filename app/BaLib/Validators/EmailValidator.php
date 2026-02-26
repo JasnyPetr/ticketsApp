@@ -1,6 +1,8 @@
 <?php
 
-namespace App\FsLib\Validators;
+declare(strict_types=1);
+
+namespace App\BaLib\Validators;
 
 class EmailValidator
 {
@@ -11,10 +13,10 @@ class EmailValidator
 
     public function checkEmail($fromEmail, $emailForCheck)
     {
-        $result = array(
+        $result = [
             'status' => null,
-            'message' => ""
-        );
+            'message' => "",
+        ];
         $syntaxCheck = $this->syntaxCheckEmailAddress($emailForCheck);
         if ($syntaxCheck) {
             $resultArr = $this->verifyServerAvailability($fromEmail, $emailForCheck);
@@ -43,7 +45,7 @@ class EmailValidator
 
     private function verifyServerAvailability($from, $email) :array
     {
-        $result = array();
+        $result = [];
         $timeout = 2;
 
         $domain = preg_replace('~.*@~', '', $email);
@@ -53,11 +55,11 @@ class EmailValidator
         }
 
 
-        $commands = array(
+        $commands = [
             "HELO " . preg_replace('~.*@~', '', $from),
             "MAIL FROM: <$from>",
             "RCPT TO: <$email>",
-        );
+        ];
 
         foreach ($mxs as $mx) {
             $fp = @fsockopen($mx, 25, $errorNumber, $error, $timeout);
@@ -82,8 +84,10 @@ class EmailValidator
                 fclose($fp);
             }else{
                 $result[] = false;
+                if ($fp) {
+                    fclose($fp);
+                }
             }
-            fclose($fp);
         }
         return $result;
 
