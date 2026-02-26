@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\BaLib\Repositories;
 
 use App\BaLib\Base\Repository;
@@ -44,19 +46,6 @@ class ActionsRepository extends Repository
                 'date_event' => $date,
                 'is_active' => $action->isActive
             ], 'WHERE id = ?', $action->id);
-            return true;
-        }catch (\Exception $e) {
-            Debugger::log($e->getMessage(), ILogger::ERROR);
-            return false;
-        }
-    }
-
-    public function updateTicketsStatusByActionId($actionId, $status)
-    {
-        try {
-            $this->database->query('UPDATE tickets SET ?', [
-                'is_active' => $status
-            ], 'WHERE action_id = ?', $actionId);
             return true;
         }catch (\Exception $e) {
             Debugger::log($e->getMessage(), ILogger::ERROR);

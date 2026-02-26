@@ -1,24 +1,22 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Model;
 
 use Nette;
 use App\BaLib\Repositories\UserRepository;
-use App\Model\MyAuthenticator;
 
 class UsersManager
 {
     private $userRepository;
-    private $authenticator;
 
     public function __construct
     (
-        UserRepository $userRepository,
-        MyAuthenticator $authenticator
+        UserRepository $userRepository
     )
     {
         $this->userRepository = $userRepository;
-        $this->authenticator = $authenticator;
     }
 
     public function registerUser($values)

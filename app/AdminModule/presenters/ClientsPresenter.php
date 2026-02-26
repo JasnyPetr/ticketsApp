@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\AdminModule\presenters;
 
 use App\BaLib\Interfaces\IClientSearch;
@@ -30,12 +32,16 @@ final class ClientsPresenter extends Nette\Application\UI\Presenter implements I
         $this->ticketsManager = $ticketsManager;
     }
 
-    public function beforeRender()
+    public function startup(): void
     {
-        if (!$this->getUser()->isLoggedIn()){
+        parent::startup();
+        if (!$this->getUser()->isLoggedIn()) {
             $this->redirect('Login:default');
         }
+    }
 
+    public function beforeRender()
+    {
         $this->template->title = 'Klienti';
         $this->template->pageClass = str_replace('Admin:', '', $this->getName()) . $this->getAction();
         $this->template->user = $this->getUser()->getIdentity();
@@ -43,17 +49,9 @@ final class ClientsPresenter extends Nette\Application\UI\Presenter implements I
 
     public function setRenderDefault($clientId)
     {
-        if (!$this->getUser()->isLoggedIn()){
-            $this->redirect('Login:default');
-        }
-
         if ($clientId) {
             $this->template->client = $this->clientsManager->loadClient($clientId);
-        } else {
-            //$this->template->clients = $this->clientsManager->loadClients();
         }
-
-
     }
     public function renderDefault(int $page = 1)
     {
@@ -91,6 +89,7 @@ final class ClientsPresenter extends Nette\Application\UI\Presenter implements I
             ->addRule($form::EMAIL, 'Zadejte prosím platný email.');
 
         $form->addSubmit('save', 'Uložit');
+        $form->addProtection('Vypršel časový limit, odešlete formulář znovu.');
 
         if (isset($this->template->client)) {
             $form->setDefaults($this->template->client[0]);
@@ -122,6 +121,7 @@ final class ClientsPresenter extends Nette\Application\UI\Presenter implements I
             ->addRule($form::EMAIL, 'Zadejte prosím platný email.');
 
         $form->addSubmit('save', 'Uložit');
+        $form->addProtection('Vypršel časový limit, odešlete formulář znovu.');
 
         $form->onSuccess[] = [$this, 'addNewClientFormSucceeded'];
         return $form;
@@ -158,13 +158,18 @@ final class ClientsPresenter extends Nette\Application\UI\Presenter implements I
         $this->sendResponse(new Nette\Application\Responses\JsonResponse($this->ticketsManager->changeTicketStatusAjax($ticketId)));
     }
 
-    public function handleSendEmailWithQrcode($actionName, $clientEmail, $ticketPath)
+    public function handleSendEmailWithQrcode($actionName, $clientEmail, $ticketId)
     {
+        $ticketPath = $this->ticketsManager->getTicketPathById($ticketId);
+        if ($ticketPath === false) {
+            $this->sendResponse(new Nette\Application\Responses\JsonResponse(false));
+            return;
+        }
         $this->sendResponse(new Nette\Application\Responses\JsonResponse($this->emailsManager->sendEmailWithQrcodeAjax($actionName, $clientEmail, $ticketPath)));
     }
 
-    public function handleDeleteTicket($ticketId, $ticketPath)
+    public function handleDeleteTicket($ticketId)
     {
-        $this->sendResponse(new Nette\Application\Responses\JsonResponse($this->ticketsManager->deleteTicketAjax($ticketId, $ticketPath)));
+        $this->sendResponse(new Nette\Application\Responses\JsonResponse($this->ticketsManager->deleteTicketAjax($ticketId)));
     }
 }

@@ -326,10 +326,10 @@
                         if (Array.isArray(response)) {
                             for (let item of response) {
                                 detail.find('.card-body tbody').append(
-                                    '<tr data-id="'+item.id+'">'
-                                    + '<td>'+item.id+'</td>'
-                                    + '<td>'+item.code+'</td>'
-                                    + '<td><a href="'+item.clientLink+'">'+item.firstName+' '+item.lastName+'</td>'
+                                    '<tr data-id="'+escapeHtml(String(item.id))+'">'
+                                    + '<td>'+escapeHtml(String(item.id))+'</td>'
+                                    + '<td>'+escapeHtml(item.code)+'</td>'
+                                    + '<td><a href="'+escapeHtml(item.clientLink)+'">'+escapeHtml(item.firstName)+' '+escapeHtml(item.lastName)+'</td>'
                                     + '<td><a class="btn '+(item.isActive ? 'text-success' : 'text-danger')+' ticket p-0 m-0" title="'+(item.isActive ? "Aktivní" : "Neaktivní")+'"><i class="bi bi-circle-fill"></i></a></td>'
                                     + '</tr>'
                                 );

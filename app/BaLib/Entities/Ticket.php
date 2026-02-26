@@ -1,10 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\BaLib\Entities;
 
 class Ticket
 {
     public int $id;
+    public int $actionId;
+    public string $code;
     public string $path;
     public bool $isActive;
     public string $clientLink;

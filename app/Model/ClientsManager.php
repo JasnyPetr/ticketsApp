@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Model;
 
 use Nette;
@@ -76,7 +78,7 @@ class ClientsManager
     {
         try {
             if ($countRows > 0) {
-                $returnArr = array();
+                $returnArr = [];
                 foreach ($values as $row) {
                     $clientObject = new Client(
                         $row['first_name'],
@@ -85,7 +87,7 @@ class ClientsManager
                     );
                     $clientObject->id = $row['id'];
 
-                    array_push($returnArr, $clientObject);
+                    $returnArr[] = $clientObject;
                 }
 
                 return $returnArr;
@@ -141,8 +143,7 @@ class ClientsManager
                 if (is_array($resultObject)) {
                     return $resultObject;
                 } else {
-                    $returnArr = array();
-                    array_push($returnArr, $resultObject);
+                    $returnArr = [$resultObject];
                     return $returnArr;
                 }
             }else{

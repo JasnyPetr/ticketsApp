@@ -124,7 +124,6 @@
 		<script src="{$basePath}/js/popper.min.js"></script>
 		<script src="{$basePath}/js/bootstrap.min.js"></script>
 		<script src="{$basePath}/js/Naja.min.js"></script>
-		<script src="{$basePath}/js/popper.min.js"></script>
 		<script src="{$basePath}/js/jquery.min.js"></script>
 		<script src="{$basePath}/js/ap_global_function.js"></script>
 		<script src="https://nette.github.io/resources/js/3/netteForms.min.js"></script>
@@ -181,7 +180,7 @@
 						if (Array.isArray(payload)) {
 							$('#overlay').addClass('d-none');
 							for (let item of payload) {
-								$('#resultSearchedClients tbody').append('<tr><td>' + item.id + '</td><td>' + item.firstName + '</td><td>' + item.lastName + '</td><td>' + item.email + '</td><td><a href="' + originUrl + '/admin/clients/default/' + item.id + '" class="btn-primary" title="Profil klienta"><i class="bi bi-person-fill"></i></a></td></tr>');
+								$('#resultSearchedClients tbody').append('<tr><td>' + escapeHtml(String(item.id)) + '</td><td>' + escapeHtml(item.firstName) + '</td><td>' + escapeHtml(item.lastName) + '</td><td>' + escapeHtml(item.email) + '</td><td><a href="' + originUrl + '/admin/clients/default/' + encodeURIComponent(item.id) + '" class="btn-primary" title="Profil klienta"><i class="bi bi-person-fill"></i></a></td></tr>');
 							}
 							$('#searchField').val('');
 
@@ -205,7 +204,7 @@
 			});
 
 			$('#searchField').on('keyup', function (e) {
-				if (e.keyCode === 13) {
+				if (e.key === 'Enter') {
 					$('#btnSearch').trigger('click');
 				}
 			});

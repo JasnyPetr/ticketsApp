@@ -200,8 +200,7 @@
 
                 if (confirm('Opravdu si přejete smazat vstupenku?')) {
                     ajaxCall({{link deleteTicket!}}, {
-                        ticketId: ticketId,
-                        ticketPath: ticketPath
+                        ticketId: ticketId
                     }, 'GET').then(function (response) {
                         if (response) {
                             appendAlert('Vstupenka smazána', 'success');
@@ -238,12 +237,12 @@
                 let currentRow = $(this).closest('tr');
                 let actionName = currentRow.attr('data-action-name');
                 let clientEmail = $('#frm-clientForm input[name="email"]').val();
-                let ticketPath = currentRow.attr('data-path');
+                let ticketId = parseInt(currentRow.attr('data-id'));
 
                 ajaxCall({{link sendEmailWithQrcode!}}, {
                     actionName: actionName,
                     clientEmail: clientEmail,
-                    ticketPath: ticketPath
+                    ticketId: ticketId
                 }, 'POST').then(function (response) {
                     if (response) {
                         appendAlert('Vstupenka odeslána.', 'success');

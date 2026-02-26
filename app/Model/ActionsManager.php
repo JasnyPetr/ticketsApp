@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Model;
 
 use Nette;
@@ -47,7 +49,7 @@ class ActionsManager
                     return false;
                 }
             }else{
-                return array();
+                return [];
             }
         }catch (\Exception $e){
             Debugger::log($e->getMessage(), ILogger::EXCEPTION);
@@ -59,7 +61,7 @@ class ActionsManager
     {
         try {
             if ($countRows > 0) {
-                $returnArr = array();
+                $returnArr = [];
                 foreach ($values as $row) {
                     $actionObject = new Action(
                         $row['name'],
@@ -69,7 +71,7 @@ class ActionsManager
                     $actionObject->id = $row['id'];
                     $actionObject->countTickets = $this->ticketsRepository->getCountTicketsByActionId($row['id']);
                     $actionObject->countTicketsUsed = $this->ticketsRepository->getCountTicketsUsedByActionId($row['id']);
-                    array_push($returnArr, $actionObject);
+                    $returnArr[] = $actionObject;
                 }
 
                 return $returnArr;
@@ -119,7 +121,7 @@ class ActionsManager
                         return false;
                     }
                     if ($isChangeStatusTickets) {
-                        $statusUpdateTickets = $this->actionsRepository->updateTicketsStatusByActionId($actionId, $actionObject->isActive);
+                        $statusUpdateTickets = $this->ticketsRepository->updateTicketsStatusByActionId($actionId, $actionObject->isActive);
                         if (!$statusUpdateTickets) {
                             return false;
                         }
@@ -162,20 +164,16 @@ class ActionsManager
                         $statusRm = $this->rmdir_recursive($path);
                         if (!$statusRm) {
                             throw new \Exception('Nepodařilo se smazat adresář se vstupenkami');
-                            return false;
                         }
                         return true;
                     }else{
                         throw new \Exception('Nepodařilo se smazat akci');
-                        return false;
                     }
                 } else {
                     throw new \Exception('Nepodařilo se najít akci');
-                    return false;
                 }
             }else{
                 throw new \Exception('Nepodařilo se najít akci');
-                return false;
             }
         }catch (\Exception $e){
             Debugger::log($e->getMessage(), ILogger::EXCEPTION);
@@ -190,7 +188,7 @@ class ActionsManager
             foreach ($files as $file) {
                 if ($file != "." && $file != "..") {
                     if (is_dir($directory . '/' . $file)) {
-                        rmdir_recursive($directory . '/' . $file);
+                        $this->rmdir_recursive($directory . '/' . $file);
                     } else {
                         unlink($directory . '/' . $file);
                     }

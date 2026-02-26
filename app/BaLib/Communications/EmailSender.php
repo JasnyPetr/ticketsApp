@@ -1,8 +1,10 @@
 <?php
 
-namespace App\FsLib\Communications;
+declare(strict_types=1);
 
-use App\FsLib\Validators\EmailValidator;
+namespace App\BaLib\Communications;
+
+use App\BaLib\Validators\EmailValidator;
 use Nette\Mail\Message;
 use Nette\Mail\SendmailMailer;
 use Tracy\Debugger;
@@ -14,11 +16,11 @@ class EmailSender
     private $mail;
     private $emailValidator;
     private $emailFrom;
-    private $emailFor = array();
-    private $emailForCopy = array();
-    private $emailForHideCopy = array();
+    private $emailFor = [];
+    private $emailForCopy = [];
+    private $emailForHideCopy = [];
     private $subject;
-    private $attachment = array();
+    private $attachment = [];
     private $body = null;
     private $formalControl;
 
@@ -213,7 +215,7 @@ class EmailSender
                 foreach ($this->emailForHideCopy as $copyRecipientHidden) {
                     $resultFormalControl = $this->emailValidator->checkEmail($this->emailFrom, $copyRecipientHidden);
                     if ($resultFormalControl['status'] == true) {
-                        $this->mail->addCc($copyRecipientHidden);
+                        $this->mail->addBcc($copyRecipientHidden);
                         continue;
                     }else{
                         Debugger::log($resultFormalControl['message'] . $copyRecipientHidden, ILogger::WARNING);
@@ -222,7 +224,7 @@ class EmailSender
             } elseif (count($this->emailForHideCopy) == 1) {
                 $resultFormalControl = $this->emailValidator->checkEmail($this->emailFrom, $this->emailForHideCopy[0]);
                 if ($resultFormalControl['status'] == true) {
-                    $this->mail->addCc($this->emailForHideCopy[0]);
+                    $this->mail->addBcc($this->emailForHideCopy[0]);
                 }else{
                     Debugger::log($resultFormalControl['message'] . $this->emailForHideCopy[0], ILogger::WARNING);
                 }
@@ -230,10 +232,10 @@ class EmailSender
         }else{
             if (count($this->emailForHideCopy) > 1) {
                 foreach ($this->emailForHideCopy as $copyRecipientHidden) {
-                    $this->mail->addCc($copyRecipientHidden);
+                    $this->mail->addBcc($copyRecipientHidden);
                 }
             } elseif (count($this->emailForHideCopy) == 1) {
-                $this->mail->addCc($this->emailForHideCopy[0]);
+                $this->mail->addBcc($this->emailForHideCopy[0]);
             }
         }
 
@@ -251,7 +253,7 @@ class EmailSender
         if (count($this->attachment) > 1) {
             foreach ($this->attachment as $attach) {
                 if ($attach['fileName'] != '') {
-                    $this->mail->addAttachment($attach['fileName'], file_get_contents(['filePath']));
+                    $this->mail->addAttachment($attach['fileName'], file_get_contents($attach['filePath']));
                 }else{
                     $this->mail->addAttachment($attach['filePath']);
                 }

@@ -1,11 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\BaLib\Repositories;
 
 use App\BaLib\Base\Repository;
-use Nette\Security\Passwords;
 use Tracy\Debugger;
 use Tracy\ILogger;
+
 class ClientsRepository extends Repository
 {
     public function __construct(\Nette\Database\Context $database)

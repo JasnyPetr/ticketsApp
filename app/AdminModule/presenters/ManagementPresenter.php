@@ -1,32 +1,42 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\AdminModule\presenters;
 
 use Nette;
 use App\BaLib\Interfaces\IClientSearch;
 use App\Model\ActionsManager;
+use App\Model\ClientsManager;
 use App\Model\TicketsManager;
 
 class ManagementPresenter extends Nette\Application\UI\Presenter implements IClientSearch
 {
     private $actionsManager;
+    private $clientsManager;
     private $ticketsManager;
     public function __construct
     (
         ActionsManager $actionsManager,
+        ClientsManager $clientsManager,
         TicketsManager $ticketsManager
     )
     {
         $this->actionsManager = $actionsManager;
+        $this->clientsManager = $clientsManager;
         $this->ticketsManager = $ticketsManager;
+    }
+
+    public function startup(): void
+    {
+        parent::startup();
+        if (!$this->getUser()->isLoggedIn()) {
+            $this->redirect('Login:default');
+        }
     }
 
     public function beforeRender()
     {
-        if (!$this->getUser()->isLoggedIn()){
-            $this->redirect('Login:default');
-        }
-
         $this->template->title = 'Management';
         $this->template->pageClass = str_replace('Admin:', '', $this->getName()) . $this->getAction();
         $this->template->user = $this->getUser()->getIdentity();
@@ -57,6 +67,7 @@ class ManagementPresenter extends Nette\Application\UI\Presenter implements ICli
         $form->addCheckbox('isActive', 'Aktivní')
             ->setDefaultValue(true);
         $form->addSubmit('addNewAction', 'Vytvořit akci');
+        $form->addProtection('Vypršel časový limit, odešlete formulář znovu.');
         $form->onSuccess[] = [$this, 'addNewActionFormSucceeded'];
         return $form;
     }

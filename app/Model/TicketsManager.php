@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Model;
 
 use App\BaLib\Entities\Ticket;
@@ -51,7 +53,7 @@ class TicketsManager
     {
         try {
             if ($countRows > 0) {
-                $returnArr = array();
+                $returnArr = [];
                 foreach ($values as $row) {
                     $ticketObject = new Ticket(
                         $row['action_id'],
@@ -78,7 +80,7 @@ class TicketsManager
                         }
                     }
 
-                    array_push($returnArr, $ticketObject);
+                    $returnArr[] = $ticketObject;
                 }
 
                 return $returnArr;
@@ -135,14 +137,32 @@ class TicketsManager
         }
     }
 
-    public function deleteTicketAjax($ticketId, $ticketPath)
+    public function getTicketPathById($ticketId)
     {
         try {
-            if (file_exists($ticketPath)) {
+            $ticketData = $this->ticketsRepository->getTicketById($ticketId);
+            if ($ticketData) {
+                $ticketObject = $this->createTicketFromDb($ticketData, count($ticketData));
+                if ($ticketObject) {
+                    return $ticketObject[0]->path;
+                }
+            }
+            return false;
+        } catch (\Exception $e) {
+            Debugger::log($e->getMessage(), ILogger::EXCEPTION);
+            return false;
+        }
+    }
+
+    public function deleteTicketAjax($ticketId)
+    {
+        try {
+            $ticketPath = $this->getTicketPathById($ticketId);
+            if ($ticketPath !== false && file_exists($ticketPath)) {
                 unlink($ticketPath);
             }
             return $this->ticketsRepository->deleteTicket($ticketId);
-        }catch (\Exception $e){
+        } catch (\Exception $e) {
             Debugger::log($e->getMessage(), ILogger::EXCEPTION);
             return false;
         }
@@ -192,7 +212,7 @@ class TicketsManager
             ]);
 
             if (!file_exists('./files/qr/akce_'. $actionId)) {
-                mkdir('./files/qr/akce_'.$actionId, 0777, true);
+                mkdir('./files/qr/akce_'.$actionId, 0755, true);
             }
 
             $qrcode = new QRCode($options);
@@ -206,29 +226,13 @@ class TicketsManager
         }
     }
 
-    private function saveQrCodeImage($qrcode, $code)
-    {
-        try {
-            if (!file_exists('files/qr/')) {
-                mkdir('files/qr/', 0777, true);
-            }
-            //Nette\Utils\FileSystem::write('files/qr/'.$qrcode.'.png', $qrcode);
-
-            file_put_contents('files/qr/'.$code.'.png', $qrcode);
-            return true;
-        }catch (Nette\IOException $e){
-            Debugger::log($e->getMessage(), ILogger::EXCEPTION);
-            return false;
-        }
-    }
-
     private function generateRandomCode($length = 10)
     {
         $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
         $code = '';
 
         for ($i = 0; $i < $length; $i++) {
-            $randomIndex = mt_rand(0, strlen($characters) - 1);
+            $randomIndex = random_int(0, strlen($characters) - 1);
             $code .= $characters[$randomIndex];
         }
 
